@@ -1,6 +1,8 @@
 const express = require('express');
 const Task = require('../models/task');
 const auth = require('../middleware/auth');
+const sharp = require('sharp')
+const upload = require('../middleware/upload')
 const router = new express.Router();
 
 
@@ -12,6 +14,8 @@ router.post('/tasks', auth, async (req, res) => {
     });
     try {
         await task.save();
+        console.log(task);
+        
         res.status(201).send(task);
     } catch(e) {
         res.status(400).send(e);
@@ -91,5 +95,49 @@ router.delete('/tasks/:id', auth, async (req, res) => {
         res.status(500).send();
     }
 });
+
+
+// picture upload
+router.post('/tasks/:id/picture', auth, upload.single('taskPicture'), async (req, res) => {
+    const _id = req.params.id
+    const task = await Task.findOne({ _id, owner: req.user._id });
+    try{
+        const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
+        task.picture = buffer
+        await task.save()
+        res.send(task)
+    } catch (e) {
+        res.status(500).send();
+    }
+}, (error, req, res, next) => {
+    res.status(400).send({error: error.message})
+})
+
+// fetch and get the task image
+router.get('/tasks/:id/picture', async (req, res) => {
+    try {
+        const task = await Task.findById(req.params.id)
+        if(!task || !task.picture){
+            throw new Error()
+        }
+        res.set('Content-Type', 'image/png')
+        res.send(task.picture)
+    } catch (e) {
+        res.status(500).send() 
+    }
+})
+
+// picture delete
+router.delete('/tasks/:id/picture', auth, async (req, res) => {
+    try{
+        const _id = req.params.id
+        const task = await Task.findOne({ _id, owner: req.user._id })
+        task.picture = undefined
+        await task.save()
+        res.send(task)
+    } catch (e){
+        res.status(500).send() 
+    }
+})
 
 module.exports = router;

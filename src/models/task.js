@@ -15,10 +15,23 @@ const taskSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'User'
+    },
+    picture: {
+        type: Buffer
     }
 }, {
     timestamps: true
 });
+
+// tri les data de retour 
+taskSchema.methods.toJSON  = function() {
+    const task = this;
+    const taskObject = task.toObject();
+
+    delete taskObject.picture;
+
+    return taskObject;
+};
 
 const Task = new mongoose.model('Tasks', taskSchema);
 
