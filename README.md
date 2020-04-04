@@ -67,6 +67,6 @@ https://d27868-node-2-task-manager-api.herokuapp.com/
         <h4>Method & path:</h4>
         <p>POST /users/logoutAll</p>
         <h4>data needed:</h4>
-        <p><p>The user is logged out from all its devices using its tokens</p></p>
+        <p>The user is logged out from all its devices using its tokens</p>
     </li>
 </ul>
